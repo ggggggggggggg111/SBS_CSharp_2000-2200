@@ -16,6 +16,7 @@ namespace Inheritance
                 Console.WriteLine($"[HpBar] : {_hp}");
             }
         }
+
         private string _hp;
 
         public void Refresh(float value)

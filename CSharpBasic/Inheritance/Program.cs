@@ -1,4 +1,6 @@
-﻿using System.Threading;
+﻿using System.Runtime.InteropServices;
+using System.Threading;
+
 namespace Inheritance
 {
     internal class Program
@@ -7,9 +9,8 @@ namespace Inheritance
         {
             Knight knight = new Knight();
             knight.hp = 10;
-            HpBar knightHpBar= new HpBar();
-
-            knight.onHpChanged += knightHpBar.Refresh;
+            HpBar knightHpBar = new HpBar();
+            IDamageable damageable = knight;
             knight.onHpChanged += knightHpBar.Refresh;
             knight.onHpChanged += knightHpBar.Refresh;
             knight.onHpChanged += knightHpBar.Refresh;
@@ -17,13 +18,15 @@ namespace Inheritance
             knight.onHpChanged += (value) =>
             {
                 Console.WriteLine(value);
-            };
+            }; 
+            //람다식 표현
+            // 컴파일러가 알아서 유추할 수 있는 내용을 모두 지운 뒤,  => 이 기호로 람다식이라는 명시만 해주면 된다.
             while (true)
             {
                 knight.hp -= 1;
-                
                 Thread.Sleep(100);
             }
+
             //Creature creature1 = new Creature();  // 추상클래스는 인스턴스화 불가능
             //creature1.Breath();
 
@@ -61,8 +64,69 @@ namespace Inheritance
                 if (characters[i] is Knight)
                     Console.WriteLine("기사 발견!");
             }
+
         }
 
-         
+        public void Test()
+        {
+            PrintSomething(3);
+            PrintSomething<double>(3); 
+            PrintSomething<long>(3);
+            // Generic 타입 자체가 코드영역에 할당되는게 아니고
+            // (런타임중에 제네릭참조해서 새로운 함수를 만들어서 스택영역에 쌓는게 아님)
+            // 컴파일타임에 컴파일러가 사용되고있는 형태를 함수로 새로 만들어서 코드영역에 할당함. 
+            // ex) Something<T>() 함수가있고, Something<int>() 라는 함수호출을 어딘가에서 하고있으면
+            // 컴파일타임에 Something<int>() 를 만든다.
+
+            Dummy<int> dummy1 = new Dummy<int>();
+            Dummy<float> dummy2 = new Dummy<float>();
+            Dummy<Knight> dummy3 = new Dummy<Knight>();
+            Dummy<IDamageable> dummy4 = new Dummy<IDamageable>();
+        }
+
+
+        public void PrintSomething(int value)
+        {
+            Console.WriteLine(value);
+        }
+
+        public void PrintSomething(float value)
+        {
+            Console.WriteLine(value);
+        }
+
+        public void PrintSomething(string value)
+        {
+            Console.WriteLine(value);
+        }
+
+        public void PrintSomething(int value1, string value2)
+        {
+            Console.WriteLine(value1 + value2);
+        }
+
+        public void PrintSomething<T>(T value)
+        {
+            Console.WriteLine(value);
+        }
+    }
+
+    // 제네릭 클래스
+    // 제네릭 : 타입을 정의 할 수 있는 형태를 정의하는 형식 (타입을 일반화 할 수 있눈 형식)
+    public class Dummy<T>
+    {
+        public T value;
+
+        public void SaySomething()
+        {
+            T value1 = value;
+            What<int>();
+            What<T>();
+        }
+
+        public void What<K>()
+        {
+
+        }
     }
 }

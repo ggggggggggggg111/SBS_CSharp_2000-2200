@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Inheritance
 {
-    internal abstract class Enemy : Creature,IDamageable
+    internal abstract class Enemy : Creature, IDamageable
     {
         public float hp
         {
