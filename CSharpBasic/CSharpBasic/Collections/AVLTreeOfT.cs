@@ -14,7 +14,7 @@ namespace Collections
             public T Value;
             public Node Left;
             public Node Right;
-            public int Depth;
+            public int Height;
         }
 
         private Node _root;
@@ -28,14 +28,40 @@ namespace Collections
         {
             if(node == null)
             {
-                return new Node { Value = value, Depth = 1 };
+                return new Node { Value = value, Height = 1 };
             }
 
             int compare = value.CompareTo(node.Value);
             if (compare <0)
             {
                 node.Left =  Add(node.Left, value);
+            }else if(compare > 0)
+            {
+                node.Right = Add(node.Right, value);
             }
+
+            node.Height = 1 + Math.Max(node?.Left.Height ?? 0, node.Right.Height);
+            int balance =Balance(node);
+            // 왼쪽으로 치우처져있으면
+            if (balance > 1)
+            {
+                
+            }
+            // 오른쪽으로 치우처져있으면
+            else if(balance < -1)
+            {
+
+            }
+
+        }
+        /// <summary>
+        ///  기준노드를 중심으로 어느쪽으로 자식노드들이 치우쳐져있는지 판단
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns> 왼쪽: >1, 오른쪽 : < -1 </returns>
+        private int Balance(Node node)
+        {
+            return node != null ? (node?.Left.Height ?? 0 - node?.Right.Height ?? 0) : 0;
         }
     }
 }
