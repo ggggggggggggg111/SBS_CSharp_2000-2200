@@ -91,19 +91,21 @@ namespace Collections
             node.Next = _tmp;
             _tmp.Prev = node;
         }
+
         public Node<T> Find(T target)
         {
             _tmp = _first;
             while (_tmp != null)
             {
-                if(Comparer<T>.Default.Compare(_tmp.Value, target)==0)
+                if (Comparer<T>.Default.Compare(_tmp.Value, target) == 0)
                     return _tmp;
 
-                _tmp = _tmp.Prev;
+                _tmp = _tmp.Next;
             }
 
             return null;
         }
+
         public Node<T> FindLast(T target)
         {
             _tmp = _last;
@@ -117,15 +119,16 @@ namespace Collections
 
             return null;
         }
+
         public Node<T> Find(Predicate<T> match)
         {
             _tmp = _first;
             while (_tmp != null)
             {
-                if(match.Invoke(_tmp.Value))
+                if (match.Invoke(_tmp.Value))
                     return _tmp;
 
-                _tmp = _tmp.Prev;
+                _tmp = _tmp.Next;
             }
 
             return null;
@@ -144,12 +147,13 @@ namespace Collections
 
             return null;
         }
+
         public bool Remove(Node<T> node)
         {
-            if(node == null)
+            if (node == null)
                 return false;
-           
-            if(node.Prev != null)
+
+            if (node.Prev != null)
             {
                 node.Prev.Next = node.Next;
             }
@@ -158,17 +162,16 @@ namespace Collections
             {
                 _first = node.Next;
             }
-            
+
             if (node.Next != null)
             {
                 node.Next.Prev = node.Prev;
             }
-            //삭제하려는 노드가 last  일 경우 (다음 노드가 없으니까)
+            // 삭제하려는 노드가 last 일 경우 (다음 노드가 없으니까)
             else
             {
                 _last = node.Prev;
             }
-            
 
             return true;
         }
@@ -177,6 +180,7 @@ namespace Collections
         {
             return Remove(Find(value));
         }
+
         public bool RemoveLast(T value)
         {
             return Remove(FindLast(value));
@@ -197,21 +201,23 @@ namespace Collections
             public T Current => _currentNode.Value;
 
             object IEnumerator.Current => _currentNode.Value;
+
             private MyLinkedList<T> _linkedList;
             private Node<T> _currentNode;
+
             public Enumerator(MyLinkedList<T> linkedList)
             {
                 _linkedList = linkedList;
                 _currentNode = null;
             }
+
             public void Dispose()
             {
-                
             }
 
             public bool MoveNext()
             {
-                if(_currentNode == null)
+                if (_currentNode == null)
                 {
                     _currentNode = _linkedList.First;
                 }

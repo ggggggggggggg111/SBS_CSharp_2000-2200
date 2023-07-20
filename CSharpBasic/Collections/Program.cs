@@ -116,21 +116,35 @@ namespace Collections
             #region Hashtable
 
             Hashtable ht = new Hashtable();
-            ht.Add(1,"철수");
+            ht.Add(1, "철수");
 
-            Dictionary<string,int> dictionary1 = new Dictionary<string,int>();
+            Dictionary<string, int> dictionary1 = new Dictionary<string, int>();
             dictionary1.Add("철수", 10);
-            if(dictionary1.TryGetValue("철수", out int grade))
-            {
-                Console.WriteLine("철수 점수 : "+grade);
-            }
-
-            MyHashtable<string, int> dictionary2 = new MyHashtable<string, int>(1000);
-            dictionary2.Add("철수", 400);
-            if (dictionary2.TryGetValue("철수", out  grade))
+            if (dictionary1.TryGetValue("철수", out int grade))
             {
                 Console.WriteLine("철수 점수 : " + grade);
             }
+
+            MyHashtable<string, int> dictionary2 = new MyHashtable<string, int>(1000);
+            dictionary2.Add("철수", 40);
+            if (dictionary2.TryGetValue("철수", out grade))
+            {
+                Console.WriteLine("철수 점수 : " + grade);
+            }
+
+            #endregion
+
+
+            #region BinaryTree
+
+            AVLTree<int> bt = new AVLTree<int>();
+
+            bt.Add(3);
+            bt.Add(6);
+            bt.Add(7);
+            bt.Add(4);
+            bt.Remove(3);
+
             #endregion
         }
     }

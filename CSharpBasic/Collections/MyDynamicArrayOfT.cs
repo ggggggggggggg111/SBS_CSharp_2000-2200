@@ -141,9 +141,9 @@ namespace Collections
             _count--;
             return true;
         }
-        public void RemoveAt(int index)
-        {          
 
+        public void RemoveAt(int index)
+        {
             if (index < 0)
                 throw new IndexOutOfRangeException();
 
@@ -153,6 +153,7 @@ namespace Collections
             }
             _count--;
         }
+
         IEnumerator IEnumerable.GetEnumerator()
         {
             for (int i = 0; i < _count; i++)

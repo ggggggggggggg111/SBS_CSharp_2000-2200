@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -22,29 +21,30 @@ namespace Collections
 
                 throw new Exception($"[MyHashtable] : {key} is not exist");
             }
-            set 
+            set
             {
                 int index = Hash(key);
                 for (int i = 0; i < buckets[index].Count; i++)
                 {
                     if (Comparer<TKey>.Default.Compare(buckets[index][i].Key, key) == 0)
-                         buckets[index][i] = new KeyValuePair(key, value);
+                        buckets[index][i] = new KeyValuePair(key, value);
                 }
 
                 throw new Exception($"[MyHashtable] : {key} is not exist");
             }
         }
+
         private struct KeyValuePair : IComparable<KeyValuePair>
         {
-
-            public TKey Key; 
+            public TKey Key;
             public TValue Value;
 
-            public KeyValuePair(TKey key,TValue value)
+            public KeyValuePair(TKey key, TValue value)
             {
                 Key = key;
                 Value = value;
             }
+
             public int CompareTo(MyHashtable<TKey, TValue>.KeyValuePair other)
             {
                 return Comparer<KeyValuePair>.Default.Compare(this, other);
@@ -63,7 +63,7 @@ namespace Collections
             }
         }
 
-        public void Add(TKey key , TValue value) 
+        public void Add(TKey key, TValue value)
         {
             int index = Hash(key);
             for (int i = 0; i < buckets[index].Count; i++)
@@ -72,21 +72,21 @@ namespace Collections
                     throw new ArgumentException($"[MyHashtable] : {key} has already added");
             }
 
-            buckets[index].Add(new KeyValuePair(key, value));   
+            buckets[index].Add(new KeyValuePair(key, value));
         }
+
         public bool Contains(TKey key)
         {
             int index = Hash(key);
             for (int i = 0; i < buckets[index].Count; i++)
             {
                 if (Comparer<TKey>.Default.Compare(buckets[index][i].Key, key) == 0)
-                   return true;
-                
+                    return true;
             }
             return false;
         }
 
-        public bool TryGetValue(TKey key,out TValue value)
+        public bool TryGetValue(TKey key, out TValue value)
         {
             value = default(TValue);
             int index = Hash(key);
@@ -94,11 +94,9 @@ namespace Collections
             {
                 if (Comparer<TKey>.Default.Compare(buckets[index][i].Key, key) == 0)
                 {
-                    value = buckets[index][i].Value;    
+                    value = buckets[index][i].Value;
                     return true;
                 }
-                    
-
             }
             return false;
         }
@@ -113,12 +111,10 @@ namespace Collections
                     buckets[index].RemoveAt(i);
                     return true;
                 }
-                    
-
             }
             return false;
-
         }
+
         public int Hash(TKey key)
         {
             string keyName = key.ToString();
@@ -129,7 +125,5 @@ namespace Collections
             }
             return hashValue %= _capacity;
         }
-
-        
     }
 }
