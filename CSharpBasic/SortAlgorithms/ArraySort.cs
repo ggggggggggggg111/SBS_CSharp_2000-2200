@@ -132,7 +132,7 @@ namespace SortAlgorithms
         {
             if (start < end)
             {
-                int mid = 2 * end + (start - end) / 2 - 1;// == (start + end) /2 - 1, Overflow 방자용
+                int mid =  end + (start - end) / 2 - 1;// == (start + end) /2 - 1, Overflow 방자용
                 RecursiveMergeSort(arr,start, mid);
                 RecursiveMergeSort(arr,mid +1, mid);
 
@@ -140,10 +140,7 @@ namespace SortAlgorithms
             }
         }
 
-        private static void RecursiveMerge(int[] arr,int start, int mid, int end)
-        {
-
-        }
+        
 
         // ref : 인자를 변수의 참조로 받아야할때 사용하는 키워드
         public static void Swap(ref int a, ref int b)
