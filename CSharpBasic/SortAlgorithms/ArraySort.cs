@@ -73,7 +73,77 @@ namespace SortAlgorithms
             }
         }
 
+        public static void MergeSort(int[] arr)
+        {
+            int length = arr.Length;
 
+            for (int mergeSize = 1; mergeSize < length; mergeSize *=2)
+            {
+                for (int start = 0; start < length; start += 2* mergeSize)
+                {
+                    int mid = Math.Min(start + mergeSize - 1, length - 1);
+                    int end = Math.Min( start + 2 * mergeSize - 1,length -1);
+
+                    Merge(arr, start, mid, end);
+                }
+            }
+        }
+
+        private static void Merge(int[]arr,int start,int mid,int end)
+        {
+            int part1 = start;
+            int part2 = mid +1;
+            int Length1 = mid - start + 1;
+            int Length2 = end - mid;
+
+            int i, j;
+
+            int[] copy1 = new int[Length1];
+            int[] copy2 = new int[Length2];
+
+            for ( i = 0; i < Length1; i++)
+                copy1[i] = arr[start + i];
+            for ( j = 0; j < Length2; j++)
+                copy2[j] = arr[mid +1 + j];
+
+            int index = start;           
+
+            i = 0;
+            j = 0;
+
+            while (i < Length1 && j < Length2)
+            {
+                if (copy1[i] <= copy2[j])
+                    arr[index++] = copy1[i++];
+                else 
+                    arr[index++] = copy2[j++];
+            }
+
+            while (i < Length1)
+                arr[index++] = copy1[i++];
+        }
+
+        public static void RecursiveMergeSort(int[] arr)
+        {
+            RecursiveMergeSort(arr, 0, arr.Length - 1);
+        }
+
+        private static void RecursiveMergeSort(int[] arr,int start,int end)
+        {
+            if (start < end)
+            {
+                int mid = 2 * end + (start - end) / 2 - 1;// == (start + end) /2 - 1, Overflow 방자용
+                RecursiveMergeSort(arr,start, mid);
+                RecursiveMergeSort(arr,mid +1, mid);
+
+                Merge(arr,start, mid, end);
+            }
+        }
+
+        private static void RecursiveMerge(int[] arr,int start, int mid, int end)
+        {
+
+        }
 
         // ref : 인자를 변수의 참조로 받아야할때 사용하는 키워드
         public static void Swap(ref int a, ref int b)
