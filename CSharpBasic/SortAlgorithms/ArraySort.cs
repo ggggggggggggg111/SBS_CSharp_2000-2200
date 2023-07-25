@@ -28,48 +28,50 @@ namespace SortAlgorithms
                 }
             }
         }
+
         /// <summary>
         /// 선택 정렬
-        /// o(N^2)
+        /// O(N^2)
         /// Unstable
         /// </summary>
         /// <param name="arr"></param>
         public static void SelectionSort(int[] arr)
         {
             int i, j, minIdx;
-            for ( i = 0; i <arr.Length;i++ )
+            for (i = 0; i < arr.Length; i++)
             {
                 minIdx = i;
-                for ( j = i+1; j < arr.Length; j++)
+                for (j = i + 1; j < arr.Length; j++)
                 {
                     if (arr[j] < arr[minIdx])
-                        minIdx= j;
+                        minIdx = j;
                 }
 
-                Swap(ref arr[i],ref arr[minIdx]);
+                Swap(ref arr[i], ref arr[minIdx]);
             }
         }
+
         /// <summary>
         /// 삽입정렬
         /// O(N^2)
         /// Stable
         /// </summary>
         /// <param name="arr"></param>
-
         public static void InsertionSort(int[] arr)
         {
             int i, j;
             int key;
-            for ( i = 0; i < arr.Length; i++)
+
+            for (i = 1; i < arr.Length; i++)
             {
                 key = arr[i];
                 j = i - 1;
-                while (j>= 0 && arr[j] > key)
+                while (j >= 0 && arr[j] > key)
                 {
-                    arr[j+1] = arr[j];
+                    arr[j + 1] = arr[j];
                     j--;
                 }
-                arr[j+1] =key;
+                arr[j + 1] = key;
             }
         }
 
@@ -77,70 +79,136 @@ namespace SortAlgorithms
         {
             int length = arr.Length;
 
-            for (int mergeSize = 1; mergeSize < length; mergeSize *=2)
+            for (int mergeSize = 1; mergeSize < length; mergeSize *= 2)
             {
-                for (int start = 0; start < length; start += 2* mergeSize)
+                for (int start = 0; start < length; start += 2 * mergeSize)
                 {
                     int mid = Math.Min(start + mergeSize - 1, length - 1);
-                    int end = Math.Min( start + 2 * mergeSize - 1,length -1);
+                    int end = Math.Min(start + 2 * mergeSize - 1, length - 1);
 
                     Merge(arr, start, mid, end);
                 }
             }
         }
 
-        private static void Merge(int[]arr,int start,int mid,int end)
+        private static void Merge(int[] arr, int start, int mid, int end)
         {
             int part1 = start;
-            int part2 = mid +1;
-            int Length1 = mid - start + 1;
-            int Length2 = end - mid;
+            int part2 = mid + 1;
+            int length1 = mid - start + 1;
+            int length2 = end - mid;
 
-            int i, j;
+            int[] copy1 = new int[length1];
+            int[] copy2 = new int[length2];
 
-            int[] copy1 = new int[Length1];
-            int[] copy2 = new int[Length2];
-
-            for ( i = 0; i < Length1; i++)
+            int i = 0; // Copy1 index
+            int j = 0; // Copy2 index
+            for (i = 0; i < length1; i++)
                 copy1[i] = arr[start + i];
-            for ( j = 0; j < Length2; j++)
-                copy2[j] = arr[mid +1 + j];
 
-            int index = start;           
+            for (j = 0; j < length2; j++)
+                copy2[j] = arr[mid + 1 + j];
 
+            int index = start;
             i = 0;
             j = 0;
 
-            while (i < Length1 && j < Length2)
+            while (i < length1 && j < length2)
             {
                 if (copy1[i] <= copy2[j])
                     arr[index++] = copy1[i++];
-                else 
+                else
                     arr[index++] = copy2[j++];
             }
 
-            while (i < Length1)
+            while (i < length1)
                 arr[index++] = copy1[i++];
         }
 
+
+
         public static void RecursiveMergeSort(int[] arr)
         {
-            RecursiveMergeSort(arr, 0, arr.Length - 1);
+            RecursiveMergeSort(arr, 0, arr.Length -1);
         }
 
-        private static void RecursiveMergeSort(int[] arr,int start,int end)
+        private static void RecursiveMergeSort(int[] arr, int start, int end)
         {
             if (start < end)
             {
-                int mid =  end + (start - end) / 2 - 1;// == (start + end) /2 - 1, Overflow 방자용
-                RecursiveMergeSort(arr,start, mid);
-                RecursiveMergeSort(arr,mid +1, mid);
+                int mid = end + (start - end) / 2 - 1; // == (start + end ) /2 - 1, Overflow 방지용
+                RecursiveMergeSort(arr, start, mid);
+                RecursiveMergeSort(arr, mid + 1, end);
 
-                Merge(arr,start, mid, end);
+                Merge(arr, start, mid, end);
+            }
+        }
+        public static void QuickSort(int[] arr)
+        {
+            Stack<int> partionStack = new Stack<int>();
+            partionStack.Push(0);
+            partionStack.Push(arr.Length -1);
+
+            while(partionStack.Count > 0)
+            {
+                int end = partionStack.Pop();
+                int start = partionStack.Pop();
+                int partition =  Partition(arr, start, end);
+
+                // left side
+                if(partition - 1 > start)
+                {
+                    partionStack.Push(start); 
+                    partionStack.Push(partition -1);
+                }
+
+                // right side
+                if (partition + 1 < start)
+                {
+                    partionStack.Push(partition + 1);
+                    partionStack.Push(end);
+                }
             }
         }
 
-        
+        public static void RecursiveQuickSort(int[] arr)
+        {
+            RecursiveQuickSort(arr, 0, arr.Length - 1);
+        }
+
+        public static void RecursiveQuickSort(int[] arr, int start, int end)
+        {
+            if (start < end)
+            {
+                int partition = Partition(arr, start, end);
+                RecursiveQuickSort(arr, start, partition - 1);
+                RecursiveQuickSort(arr, partition + 1, end);
+            }
+        }
+
+        private static int Partition(int[] arr, int start, int end)
+        {
+            int pivot = arr[end + (start - end) / 2];
+
+            while (true)
+            {
+                while (arr[start] < pivot) start++;
+                while (arr[end] > pivot) end--;
+
+                if (start < end)
+                {
+                    if (arr[start] == pivot && arr[end] == pivot)
+                        end--;
+                    else
+                        Swap(ref arr[start], ref arr[end]);
+
+                }
+                else
+                {
+                    return end;
+                }
+            }
+        }
 
         // ref : 인자를 변수의 참조로 받아야할때 사용하는 키워드
         public static void Swap(ref int a, ref int b)
