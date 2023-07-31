@@ -69,10 +69,13 @@ public class Test : MonoBehaviour
     // 매 프레임마다 호출은 해야하지만, Animation  로직에 영향을 미치면 안되는 내용이나, 우선순위가 뒤로 밀려도 되는 내용들을 구현
     private void LateUpdate()
     {
+        
+    }
+    private void OnDrawGizmos()
+    {
         Gizmos.color = Color.yellow;
         Gizmos.DrawSphere(Vector3.zero, 2.0f);
     }
-
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.cyan;
