@@ -526,7 +526,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f2c55e41725586a4cbf7c95b91d8b9e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  selected: 
   _title: {fileID: 1708377527}
   _StartPlay: {fileID: 1650949205}
 --- !u!1 &1521441785
