@@ -7,7 +7,7 @@ public class SongDataMaker : MonoBehaviour
 {
     public SongData songData;
     public VideoPlayer videoPlayer;
-    private KeyCode[] _keys = { KeyCode.S, KeyCode.D, KeyCode.F, KeyCode.Space, KeyCode.J, KeyCode.K, KeyCode.L };
+    private KeyCode[] _keys = { KeyCode.Q, KeyCode.W, KeyCode.E, KeyCode.Space, KeyCode.R, KeyCode.F, KeyCode.D };
     private bool _isRecording;
 
     public void StartRecord()

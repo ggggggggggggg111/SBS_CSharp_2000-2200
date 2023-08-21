@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Notets : MonoBehaviour
+public class Note : MonoBehaviour
 {
     private void FixedUpdate()
     {

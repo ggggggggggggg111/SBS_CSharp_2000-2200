@@ -43,6 +43,7 @@ public class MusicPlayManager : MonoBehaviour
         Invoke("PlayVideo", noteFallingTime);
         _timeMark = Time.time;
         isPlaying = true;
+        Debug.Log("MusicPlay");
     }
 
     private void Update()

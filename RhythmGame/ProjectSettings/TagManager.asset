@@ -16,7 +16,7 @@ TagManager:
   - 
   - 
   - 
-  - 
+  - Note
   - 
   - 
   - 
@@ -49,4 +49,7 @@ TagManager:
     locked: 0
   - name: Foreground
     uniqueID: 2983498511
+    locked: 0
+  - name: HitEffect
+    uniqueID: 3550733279
     locked: 0

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NoteSpwaer : MonoBehaviour
+public class NoteSpawner : MonoBehaviour
 {
     public KeyCode key;
     [SerializeField] private GameObject _notePrefab;
