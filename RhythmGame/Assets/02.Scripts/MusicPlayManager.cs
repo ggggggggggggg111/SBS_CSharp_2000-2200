@@ -25,6 +25,76 @@ public class MusicPlayManager : MonoBehaviour
     [SerializeField] private Transform _spawnerCenter;
     [SerializeField] private Transform _hitterCenter;
 
+    public const int POIT_COOL = 500;
+    public const int POIT_GREAT = 300;
+    public const int POIT_GOOD = 100;
+    public const int POIT_MISS = 0;
+    public const int POIT_BAD = -100;
+    public int point;
+    public int combo
+    {
+        get => _combo;
+        set
+        {
+            if(highesCombo <value)
+                highesCombo = value;
+
+            _combo = value;
+        }
+    }
+    private int _combo;
+    public int highesCombo;
+    public int coolCount
+    {
+        get => _coolCount; 
+        set
+        {
+            point += (value - _coolCount) * POIT_COOL;
+            combo += (value - _coolCount);
+        }
+    }
+    public int greatCount
+    {
+        get => _greatCount;
+        set
+        {
+            point += (value - _greatCount) * POIT_GREAT;
+            combo += (value - _greatCount);
+        }
+    }
+    public int goodCount
+    {
+        get => _goodCount;
+        set
+        {
+            point += (value - _goodCount) * POIT_GOOD;
+            combo += (value - _goodCount);
+        }
+    }
+    public int missCount
+    {
+        get => _missCount;
+        set
+        {
+            point += (value - _missCount) * POIT_MISS;
+            combo = 0;
+        }
+    }
+    public int badCount
+    {
+        get => _badCount;
+        set
+        {
+            point += (value - _badCount) * POIT_BAD;
+            combo = 0;
+        }
+    }
+    private int _coolCount;
+    private int _greatCount;
+    private int _goodCount;
+    private int _missCount;
+    private int _badCount;
+
     private void Awake()
     {
         instance = this;
