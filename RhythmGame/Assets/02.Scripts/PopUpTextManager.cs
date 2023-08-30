@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+
 public class PopUpTextManager : MonoBehaviour
 {
     [SerializeField] private PopUpText _cool;
@@ -12,17 +13,16 @@ public class PopUpTextManager : MonoBehaviour
     [SerializeField] private PopUpText _comboTitle;
     [SerializeField] private PopUpText _comboStack;
 
-    public void PopUpJudgeText(HitJudge hitJudge)
+    public void PopUpHitJudgeText(HitJudge hitJudge)
     {
         if (_cool.gameObject.activeSelf) _cool.transform.position += Vector3.forward;
-        if (_good.gameObject.activeSelf) _good.transform.position += Vector3.forward;
         if (_great.gameObject.activeSelf) _great.transform.position += Vector3.forward;
+        if (_good.gameObject.activeSelf) _good.transform.position += Vector3.forward;
         if (_miss.gameObject.activeSelf) _miss.transform.position += Vector3.forward;
         if (_bad.gameObject.activeSelf) _bad.transform.position += Vector3.forward;
 
-
         switch (hitJudge)
-        {         
+        {
             case HitJudge.Bad:
                 _bad.PopUp();
                 break;
@@ -45,6 +45,9 @@ public class PopUpTextManager : MonoBehaviour
 
     public void PopUpComboText(int comboStack)
     {
+        if (comboStack < 2)
+            return;
+
         _comboTitle.PopUp();
         _comboStack.PopUp(comboStack.ToString());
     }
