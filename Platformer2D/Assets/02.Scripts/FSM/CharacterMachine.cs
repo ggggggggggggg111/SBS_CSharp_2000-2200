@@ -13,6 +13,8 @@ public enum State
     Fall,
     Land,
     Crouch,
+    LadderClimbing,
+    Ledge,
 }
 
 public abstract class CharacterMachine : MonoBehaviour
@@ -47,15 +49,19 @@ public abstract class CharacterMachine : MonoBehaviour
     [HideInInspector] public bool isDirectionChangeable;
     public const int DIRECTION_RIGHT = 1;
     public const int DIRECTION_LEFT = -1;
+    public const int DIRECTION_UP = 1;
+    public const int DIRECTION_DOWN = -1;
 
     // Movement
     public virtual float horizontal { get; set; }
+    public virtual float vertical { get; set; }
     public float speed;
     [HideInInspector] public Vector2 move;
     [HideInInspector] public bool isMovable;
     private Rigidbody2D _rigidbody;
 
     public State current;
+    public State previous;
     private Dictionary<State, IWorkflow<State>> _states;
     private bool _isDirty;
     public Animator animator;
@@ -65,9 +71,9 @@ public abstract class CharacterMachine : MonoBehaviour
     public bool hasSecondJumped;
 
     // Ground detection
-    public bool isGrounded { get; private set; }   
-    public bool isGroundExistBelow { get ; private set; }
-    public Collider2D ground {  get; private set; }
+    public bool isGrounded { get; private set; }
+    public bool isGroundExistBelow { get; private set; }
+    public Collider2D ground { get; private set; }
     [Header("Ground Detection")]
     [SerializeField] private Vector2 _groundDetectCenter;
     [SerializeField] private Vector2 _groundDetectSize;
@@ -78,12 +84,20 @@ public abstract class CharacterMachine : MonoBehaviour
     // Ladder detection
     public bool canLadderUp { get; private set; }
     public bool canLadderDown { get; private set; }
-    public Ladder upLadder { get; private set; }
-    public Ladder downLadder { get; private set; }
-    [SerializeField] private float _ladderUpDetectOffest;
-    [SerializeField] private float _ladderDownDetectOffest;
+    public Ladder upLadder;
+    public Ladder downLadder;
+    [SerializeField] private float _ladderUpDetectOffset;
+    [SerializeField] private float _ladderDownDetectOffset;
     [SerializeField] private float _ladderDetectRadius;
-    [SerializeField] private LayerMask _layerMask;
+    [SerializeField] private LayerMask _ladderMask;
+
+    // Ledge detection
+    public bool isLedgeDetected;
+    public Vector2 ledgePoint;
+    public Vector2 ledgeDetectOffset;
+    [SerializeField] private float _ledgeDetectDistance;
+    [SerializeField] private LayerMask _ledgeMask;
+
 
     public void Initialize(IEnumerable<KeyValuePair<State, IWorkflow<State>>> copy)
     {
@@ -91,9 +105,9 @@ public abstract class CharacterMachine : MonoBehaviour
         current = copy.First().Key;
     }
 
-    public bool ChangeState(State newState)
+    public bool ChangeState(State newState, object[] parameters = null)
     {
-        if(_isDirty)
+        if (_isDirty)
             return false;
 
         if (newState == current)
@@ -103,8 +117,9 @@ public abstract class CharacterMachine : MonoBehaviour
             return false;
 
         _states[current].OnExit();
+        previous = current;
         current = newState;
-        _states[newState].OnEnter();
+        _states[newState].OnEnter(parameters);
         _isDirty = true;
         return true;
     }
@@ -118,7 +133,7 @@ public abstract class CharacterMachine : MonoBehaviour
 
     protected virtual void Update()
     {
-        ChangeState(_states[current].MoveNext());
+        ChangeState(_states[current].OnUpdate());
 
         if (isMovable)
         {
@@ -132,11 +147,14 @@ public abstract class CharacterMachine : MonoBehaviour
         }
     }
 
+
     private void FixedUpdate()
     {
+        _states[current].OnFixedUpdate();
         _rigidbody.position += move * Time.fixedDeltaTime;
         DetectGround();
         DetectLadder();
+        DetectLedge();
     }
 
     private void LateUpdate()
@@ -147,13 +165,13 @@ public abstract class CharacterMachine : MonoBehaviour
     private void DetectGround()
     {
         ground = Physics2D.OverlapBox(_rigidbody.position + _groundDetectCenter,
-                                        _groundDetectSize,
-                                        0.0f,
-                                        _groundMask);
+                                      _groundDetectSize,
+                                      0.0f,
+                                      _groundMask);
 
         isGrounded = ground;
 
-        if (isGrounded) 
+        if (isGrounded)
         {
             RaycastHit2D hit =
                 Physics2D.BoxCast(origin: _rigidbody.position + _groundBelowDetectCenter,
@@ -162,31 +180,44 @@ public abstract class CharacterMachine : MonoBehaviour
                                   direction: Vector2.down,
                                   distance: _groundBelowDetectDistance,
                                   layerMask: _groundMask);
+
             isGroundExistBelow = hit.collider;
         }
         else
         {
             isGroundExistBelow = false;
         }
-        
     }
 
     private void DetectLadder()
     {
         Collider2D upCol =
-        Physics2D.OverlapCircle(_rigidbody.position + Vector2.up * _ladderUpDetectOffest,
+        Physics2D.OverlapCircle(_rigidbody.position + Vector2.up * _ladderUpDetectOffset,
                                 _ladderDetectRadius,
-                                _layerMask);
+                                _ladderMask);
+
         upLadder = upCol ? upCol.GetComponent<Ladder>() : null;
         canLadderUp = upLadder;
 
-
         Collider2D downCol =
-        Physics2D.OverlapCircle(_rigidbody.position + Vector2.up * _ladderDownDetectOffest,
+        Physics2D.OverlapCircle(_rigidbody.position + Vector2.up * _ladderDownDetectOffset,
                                 _ladderDetectRadius,
-                                _layerMask);
+                                _ladderMask);
+
         downLadder = downCol ? downCol.GetComponent<Ladder>() : null;
         canLadderDown = downLadder;
+    }
+
+    private void DetectLedge()
+    {
+        RaycastHit2D hit =
+            Physics2D.Raycast(_rigidbody.position + new Vector2(ledgeDetectOffset.x * direction, ledgeDetectOffset.y),
+                              Vector2.down,
+                              _ledgeDetectDistance,
+                              _ledgeMask);
+
+        isLedgeDetected = hit.collider;
+        ledgePoint = hit.point;
     }
 
     private void OnDrawGizmos()
@@ -200,8 +231,13 @@ public abstract class CharacterMachine : MonoBehaviour
                             new Vector3(_groundDetectSize.x, _groundDetectSize.y + _groundBelowDetectDistance));
 
         Gizmos.color = Color.cyan;
-        Gizmos.DrawWireSphere(transform.position + Vector3.up * _ladderUpDetectOffest, _ladderDetectRadius);
+        Gizmos.DrawWireSphere(transform.position + Vector3.up *_ladderUpDetectOffset, _ladderDetectRadius);
         Gizmos.color = Color.magenta;
-        Gizmos.DrawWireSphere(transform.position + Vector3.up * _ladderDownDetectOffest, _ladderDetectRadius);
+        Gizmos.DrawWireSphere(transform.position + Vector3.up * _ladderDownDetectOffset, _ladderDetectRadius);
+
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawLine(transform.position + (Vector3)ledgeDetectOffset,
+                        transform.position + (Vector3)ledgeDetectOffset + Vector3.down * _ledgeDetectDistance);
+
     }
 }
