@@ -8,6 +8,12 @@ public class PlayerMachine : CharacterMachine
         set => base.horizontal = value; 
     }
 
+    public override float vertical
+    {
+        get => Input.GetAxisRaw("Vertical");
+        set => base.vertical = value; 
+    }
+
     private void Start()
     {
         Initialize(CharacterStateWorkflowsDataSheet.GetWorkflowsForPlayer(this));
@@ -16,20 +22,39 @@ public class PlayerMachine : CharacterMachine
     protected override void Update()
     {
         base.Update();
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.C))
         {
-            if (ChangeState(State.JumpDown)==false)
-            if (ChangeState(State.Jump)==false)
+            if (ChangeState(State.JumpDown) == false)
+            if (ChangeState(State.Jump) == false)
                 ChangeState(State.SecondJump);
+        }
+
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            ChangeState(State.LedgeClimb);
+        }
+        if (Input.GetKey(KeyCode.UpArrow))
+        {
+            if (canLadderUp)
+                ChangeState(State.LadderClimbing, new object[] { upLadder, DIRECTION_UP });
+            ChangeState(State.Ledge);
         }
 
         if (Input.GetKeyDown(KeyCode.DownArrow))
         {
-            ChangeState(State.Crouch);
+            if (canLadderDown && current == State.Idle && (upLadder != downLadder))
+                ChangeState(State.LadderClimbing, new object[] { downLadder, DIRECTION_DOWN });
+            else
+                ChangeState(State.Crouch);
         }
-        else if(Input.GetKeyUp(KeyCode.DownArrow))
+        else if (Input.GetKey(KeyCode.DownArrow))
         {
-            if(current == State.Crouch)
+            if (canLadderDown && current == State.Idle && (upLadder != downLadder))
+                ChangeState(State.LadderClimbing, new object[] { downLadder, DIRECTION_DOWN });
+        }
+        else if (Input.GetKeyUp(KeyCode.DownArrow))
+        {
+            if (current == State.Crouch)
                 ChangeState(State.Idle);
         }
     }
