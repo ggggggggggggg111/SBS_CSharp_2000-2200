@@ -126,7 +126,8 @@ public static class CharacterStateWorkflowsDataSheet
                                            machine.hasJumped == false &&
                                            (((machine.current == State.Idle || machine.current == State.Move) && machine.isGrounded) ||
                                             machine.current == State.LadderClimbing ||
-                                            machine.current == State.Ledge);
+                                            machine.current == State.Ledge ||
+                                            machine.current == State.WallSlide);
 
         private float _force;
 
@@ -141,7 +142,7 @@ public static class CharacterStateWorkflowsDataSheet
             machine.hasJumped = true;
             machine.isDirectionChangeable = true;
             machine.isMovable = false;
-            rigidbody.velocity = machine.previous ==  State.LadderClimbing || machine.previous == State.Ledge? 
+            rigidbody.velocity = machine.previous ==  State.LadderClimbing || machine.previous == State.Ledge || machine.previous == State.WallSlide ? 
                 new Vector2(machine.horizontal * machine.speed, 0.0f) : new Vector2(rigidbody.velocity.x, 0.0f);
             rigidbody.AddForce(Vector2.up * _force, ForceMode2D.Impulse);
             animator.Play("Jump");
@@ -737,7 +738,65 @@ public static class CharacterStateWorkflowsDataSheet
             return next;
         }
     }
+    public class WallSlide : WorkflowBase
+    {
+        public override State ID => State.WallSlide;
+        public override bool CanExecute => base.CanExecute &&
+                                           machine.isWallDetected &&
+                                           (machine.current == State.Fall);
+        private float _dampingFactor; 
+        private Vector2 _velocity;
 
+        public WallSlide(CharacterMachine machine,float dampingFactor) : base(machine)
+        {
+            _dampingFactor = dampingFactor;
+        }
+
+        public override void OnEnter(object[] parameters)
+        {
+            base.OnEnter(parameters);
+            machine.isDirectionChangeable = false;
+            machine.isMovable = false;
+            machine.hasJumped = false;
+            machine.hasSecondJumped = false;
+            machine.move = Vector2.zero;
+            _velocity = Vector2.zero;
+            rigidbody.velocity = Vector2.zero;
+            rigidbody.bodyType = RigidbodyType2D.Kinematic;
+            animator.Play("WallSlide");
+        }
+
+        public override void OnExit()
+        {
+            base.OnExit();
+            rigidbody.bodyType = RigidbodyType2D.Dynamic;
+        }
+
+        public override State OnUpdate()
+        {
+            State next = ID;
+
+            switch (current)
+            {               
+                default:
+                    {
+                        if (machine.isWallDetected == false)
+                        {
+                            next = State.Idle;
+                        }
+                    }
+                    break;
+            }
+
+            return next;
+        }
+        public override void OnFixedUpdate()
+        {
+            base.OnFixedUpdate();
+            _velocity += Physics2D.gravity * (1.0f - _dampingFactor) * Time.fixedDeltaTime;
+            transform.position += (Vector3)_velocity * Time.fixedDeltaTime;
+        }
+    }
 
     public static IEnumerable<KeyValuePair<State, IWorkflow<State>>> GetWorkflowsForPlayer(CharacterMachine machine)
     {
@@ -753,7 +812,8 @@ public static class CharacterStateWorkflowsDataSheet
             { State.Crouch, new Crouch(machine, new Vector2(0.0f, 0.06f), new Vector2(0.12f, 0.12f )) },
             { State.LadderClimbing, new LadderClimbing(machine, 1.0f) },
             { State.Ledge, new Ledge(machine) },
-            { State.LedgeClimb, new LedgeClimb(machine) }
+            { State.LedgeClimb, new LedgeClimb(machine) },
+            { State.WallSlide, new WallSlide(machine, 0.8f) },
         };
     }
 
