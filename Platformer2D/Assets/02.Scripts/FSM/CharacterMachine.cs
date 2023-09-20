@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 public enum State
 {
@@ -17,10 +18,12 @@ public enum State
     Ledge,
     LedgeClimb,
     WallSlide,
-    Attack
+    Attack,
+    Hurt,
+    Die
 }
 
-public abstract class CharacterMachine : MonoBehaviour
+public abstract class CharacterMachine : MonoBehaviour, IHp
 {
     // Direction
     public int direction
@@ -87,6 +90,9 @@ public abstract class CharacterMachine : MonoBehaviour
     // Ladder detection
     public bool canLadderUp { get; private set; }
     public bool canLadderDown { get; private set; }
+
+    
+
     public Ladder upLadder;
     public Ladder downLadder;
     [SerializeField] private float _ladderUpDetectOffset;
@@ -108,6 +114,45 @@ public abstract class CharacterMachine : MonoBehaviour
     [SerializeField] private float _wallBottomDetectHeight;
     [SerializeField] private float _wallDetectDistance;
     [SerializeField] private LayerMask _wallMask;
+
+
+    //Hp
+    public float hpValue
+    {
+        get => _hpValue;
+        private set
+        {
+            if (value == _hpValue)
+                return;
+
+            if(value > _hpMax)
+                value = _hpMax;
+            else if(value < hpMin)
+                value = hpMin;
+
+            _hpValue = value;
+            onHpChanged?.Invoke(value);
+
+            if (value == hpMax)
+                onHpMax?.Invoke();
+            else if(value == hpMin)
+                onHpMin?.Invoke();
+        }
+    }
+
+
+    public float hpMax => _hpMax;
+
+    public float hpMin => 0.0f;
+
+    private float _hpValue;
+    [SerializeField] private float _hpMax;
+
+    public event Action<float> onHpChanged;
+    public event Action<float> onHpRecovered;
+    public event Action<float> onHpDepleted;
+    public event Action onHpMax;
+    public event Action onHpMin;
 
     public void Initialize(IEnumerable<KeyValuePair<State, IWorkflow<State>>> copy)
     {
@@ -139,6 +184,7 @@ public abstract class CharacterMachine : MonoBehaviour
         animator = GetComponentInChildren<Animator>();
         _rigidbody = GetComponent<Rigidbody2D>();
         direction = DIRECTION_RIGHT;
+        _hpValue = _hpMax;
     }
 
     protected virtual void Update()
@@ -262,8 +308,25 @@ public abstract class CharacterMachine : MonoBehaviour
             isWallDetected = false;
         }
     }
+    public void RecoverHp(object subject, float amount)
+    {
+        if (amount <= 0)
+            return;
 
-    private void OnDrawGizmos()
+        hpValue += amount;
+        onHpDepleted?.Invoke(amount);
+
+    }
+
+    public void DepleteHp(object subject, float amount)
+    {
+        if (amount <= 0)
+            return;
+
+        hpValue -= amount;
+        onHpRecovered?.Invoke(amount);
+    }
+    protected virtual void OnDrawGizmos()
     {
         Gizmos.color = Color.green;
         Gizmos.DrawWireCube(transform.position + (Vector3)_groundDetectCenter,
@@ -288,4 +351,6 @@ public abstract class CharacterMachine : MonoBehaviour
         Gizmos.DrawLine(transform.position + Vector3.up * _wallBottomDetectHeight,
                         transform.position + Vector3.up * _wallBottomDetectHeight + Vector3.right * _direction * _wallDetectDistance);
     }
+
+    
 }

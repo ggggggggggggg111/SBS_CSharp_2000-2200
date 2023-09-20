@@ -893,6 +893,92 @@ public static class CharacterStateWorkflowsDataSheet
             return next;
         }
     }
+    public class Hurt : WorkflowBase
+    {
+        public override State ID => State.Hurt;
+        public override bool CanExecute => base.CanExecute &&
+                                           (machine.current == State.Idle ||
+                                            machine.current == State.Move || 
+                                            machine.current == State.Jump ||
+                                            machine.current == State.Fall ||
+                                            machine.current == State.Land ||
+                                            machine.current == State.SecondJump ||
+                                            machine.current == State.Crouch ||
+                                            machine.current == State.JumpDown ||
+                                            machine.current == State.Ledge || 
+                                            machine.current == State.LadderClimbing ||
+                                            machine.current == State.WallSlide );
+
+        public Hurt(CharacterMachine machine) : base(machine)
+        {
+        }
+
+        public override void OnEnter(object[] parameters)
+        {
+            base.OnEnter(parameters);
+            machine.isDirectionChangeable = false;
+            machine.isMovable = false;
+            machine.move = Vector2.zero;
+            rigidbody.velocity = Vector2.zero;
+            animator.Play("Hurt");
+        }
+
+        public override State OnUpdate()
+        {
+            State next = ID;
+
+            switch (current)
+            {
+                default:
+                    {
+                        // 현재 애니메이터의 재생중인 상태의 정보에서 일반화된 시간이 1.0f 이된다 
+                        // == 현재 상태 애니메이션 클립 재생 끝났다 
+                        if (animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1.0f)
+                        {
+                            next = State.Idle;
+                        }
+                    }
+                    break;
+            }
+
+            return next;
+        }
+    }
+
+    public class Die : WorkflowBase
+    {
+        public override State ID => State.Die;
+
+        public Die(CharacterMachine machine) : base(machine)
+        {
+        }
+
+        public override void OnEnter(object[] parameters)
+        {
+            base.OnEnter(parameters);
+            machine.isDirectionChangeable = false;
+            machine.isMovable = false;
+            machine.move = Vector2.zero;
+            rigidbody.velocity = Vector2.zero;
+            animator.Play("Die");
+        }
+
+        public override State OnUpdate()
+        {
+            State next = ID;
+
+            switch (current)
+            {
+                default:
+                    {
+                        
+                    }
+                    break;
+            }
+
+            return next;
+        }
+    }
     public static IEnumerable<KeyValuePair<State, IWorkflow<State>>> GetWorkflowsForPlayer(CharacterMachine machine)
     {
         return new Dictionary<State, IWorkflow<State>>()
@@ -910,6 +996,26 @@ public static class CharacterStateWorkflowsDataSheet
             { State.LedgeClimb, new LedgeClimb(machine) },
             { State.WallSlide, new WallSlide(machine, 0.8f) },
             { State.Attack, new Attack(machine, 2, 0.3f) },
+        };
+    }
+
+    public static IEnumerable<KeyValuePair<State, IWorkflow<State>>> GetWorkflowsForEnemy(CharacterMachine machine)
+    {
+        return new Dictionary<State, IWorkflow<State>>()
+        {
+            { State.Idle, new Idle(machine) },
+            { State.Move, new Move(machine) },
+            { State.Jump, new Jump(machine, 3.5f) },
+            { State.JumpDown, new JumpDown(machine, 1.0f, 0.4f) },
+            { State.SecondJump, new SecondJump(machine, 3.0f) },
+            { State.Fall, new Fall(machine, 1.0f) },
+            { State.Land, new Land(machine) },
+            { State.Crouch, new Crouch(machine, new Vector2(0.0f, 0.06f), new Vector2(0.12f, 0.12f )) },
+            { State.LadderClimbing, new LadderClimbing(machine, 1.0f) },
+            { State.Ledge, new Ledge(machine) },
+            { State.LedgeClimb, new LedgeClimb(machine) },
+            { State.WallSlide, new WallSlide(machine, 0.8f) },
+            { State.Attack, new Attack(machine, 0, 0.0f) },
         };
     }
 
